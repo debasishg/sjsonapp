@@ -1,4 +1,4 @@
-package net.debasishg.sjson
+package net.debasishg.sjsonapp
 
 import org.scalatest.{Spec, BeforeAndAfterEach, BeforeAndAfterAll}
 import org.scalatest.matchers.ShouldMatchers
@@ -83,6 +83,27 @@ class TypeclassSpec extends Spec
       val address = Map("no" -> "1050/2", "street" -> "survey park", "zip" -> "700075")
       val me = Me("debasish", "ghosh", "1050/2", "survey park", "700075")
       fromjson[Me](tojson(name) |+| tojson(address)) should equal(me)
+    }
+  }
+
+  describe("Composing JsObject using Applicative") {
+    it("should allow composition of json as applicatives") {
+      case class Me(firstName: String, lastName: String, no: String, street: String, zip: String)
+      implicit val MeFormat: Format[Me] =
+        asProduct5("firstName", "lastName", "no", "street", "zip")(Me)(Me.unapply(_).get)
+
+      val me = Me("debasish", "ghosh", "1050/2", "survey park", "700075")
+      val json = tojson(me)
+      val x =
+        for {
+          fn <- get[String]("firstName")
+          ln <- get[String]("lastName")
+          no <- get[String]("no")
+          st <- get[String]("street")
+          zp <- get[String]("zip")
+        }
+        yield(fn |@| ln |@| no |@| st |@| zp)
+      x(json) {(f, l, n, s, z) => Me(f, l, n, s, z)} should equal(Success(me))
     }
   }
 }
