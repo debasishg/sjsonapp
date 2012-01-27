@@ -105,5 +105,25 @@ class TypeclassSpec extends Spec
         yield(fn |@| ln |@| no |@| st |@| zp)
       x(json) {(f, l, n, s, z) => Me(f, l, n, s, z)} should equal(Success(me))
     }
+
+    it("should allow accumulation of errors in composition of json as applicatives") {
+      case class Me(firstName: String, lastName: String, no: String, street: String, zip: String)
+      implicit val MeFormat: Format[Me] =
+        asProduct5("firstName", "lastName", "no", "street", "zip")(Me)(Me.unapply(_).get)
+
+      val me = Me("debasish", "ghosh", "1050/2", "survey park", "700075")
+      val json = tojson(me)
+      val x =
+        for {
+          fn <- get[String]("firstname")
+          ln <- get[String]("lastname")
+          no <- get[String]("no")
+          st <- get[String]("street")
+          zp <- get[String]("zip")
+        }
+        yield(fn |@| ln |@| no |@| st |@| zp)
+      val err = x(json) {(f, l, n, s, z) => Me(f, l, n, s, z)}
+      err.fail.toOption.get.list should equal(List("field firstname not found", "field lastname not found"))
+    }
   }
 }
