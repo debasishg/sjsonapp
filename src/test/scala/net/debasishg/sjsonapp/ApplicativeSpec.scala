@@ -74,6 +74,16 @@ class TypeclassSpec extends Spec
       tojson(s1) |+| tojson(s2) |+| tojson(s3) should equal(tojson(s1 |+| s2 |+| s3))
     }
 
+    it("should app objects to form larger ones") {
+      val name = Map("firstName" -> "debasish", "lastName" -> "ghosh")
+      val address = Map("no" -> "1050/2", "street" -> "survey park", "zip" -> "700075")
+      val s1 = Map("salary" -> 1000)
+      val s2 = Map("salary" -> 1200)
+      val s3 = Map("salary" -> 1700)
+      tojson(name) |+| tojson(address) |+| tojson(s1) |+| tojson(s2) |+| tojson(s3) should 
+        equal(tojson(name) |+| tojson(address) |+| tojson(s1 |+| s2 |+| s3))
+    }
+
     it("should append user defined objects to form larger ones") {
       case class Me(firstName: String, lastName: String, no: String, street: String, zip: String)
       implicit val MeFormat: Format[Me] =

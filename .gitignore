@@ -3,3 +3,4 @@ target
 project/boot
 logs/
 .swp
+*.scala.swp
