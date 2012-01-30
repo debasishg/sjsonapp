@@ -1,13 +1,13 @@
 package net.debasishg
+package sjson
 
 import scalaz._
 import Scalaz._
 
 import dispatch.json._
-import sjson.json.Reads
 import sjson.json.JsonSerialization._
 
-package object sjsonapp {
+package object json {
   implicit def JsStringZero = new Zero[JsString] {
     val zero = JsString("")
   }
@@ -78,11 +78,4 @@ package object sjsonapp {
         case x => sys.error("Invalid combination: " + x)
       }
     }
-
-  def get[T](name: String)(implicit fjs: Reads[T]): JsValue => ValidationNEL[String, T] = {json: JsValue =>
-    val JsObject(m) = json
-    m.get(JsString(name))
-     .map(fromjson[T](_)(fjs).success)
-     .getOrElse(("field " + name + " not found").fail.liftFailNel)
-  }
 }
