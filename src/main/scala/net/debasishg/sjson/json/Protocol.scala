@@ -30,24 +30,24 @@ trait Protocol {
 
 trait DefaultProtocol extends CollectionTypes with Generic with Primitives
 object DefaultProtocol extends DefaultProtocol {
-  def field[T](name: String, json: JsValue)(implicit fjs: Reads[T]): ValidationNEL[String, T] = {
+  def field[T: Reads](name: String, json: JsValue): ValidationNEL[String, T] = {
     val JsObject(m) = json
     m.get(JsString(name))
-     .map(fromjson[T](_)(fjs))
+     .map(fromjson[T](_))
      .getOrElse(("field " + name + " not found").fail.liftFailNel)
   }
 
-  def field[T](name: String, json: JsValue, valid: T => ValidationNEL[String, T])(implicit fjs: Reads[T]): ValidationNEL[String, T] = {
+  def field[T: Reads](name: String, json: JsValue, valid: T => ValidationNEL[String, T]): ValidationNEL[String, T] = {
     val JsObject(m) = json
     m.get(JsString(name))
-     .map(fromjson[T](_)(fjs).flatMap(valid))
+     .map(fromjson[T](_).flatMap(valid))
      .getOrElse(("field " + name + " not found").fail.liftFailNel)
   }
 
-  def field_c[T](name: String)(implicit fjs: Reads[T]): JsValue => ValidationNEL[String, T] = {json: JsValue =>
+  def field_c[T: Reads](name: String): JsValue => ValidationNEL[String, T] = {json: JsValue =>
     val JsObject(m) = json
     m.get(JsString(name))
-     .map(fromjson[T](_)(fjs))
+     .map(fromjson[T](_))
      .getOrElse(("field " + name + " not found").fail.liftFailNel)
   }
 }
