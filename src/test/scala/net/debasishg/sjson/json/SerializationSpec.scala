@@ -124,4 +124,30 @@ class SerializationSpec extends Spec with ShouldMatchers {
         kleisli[VA, Int, Int](positive) >=> kleisli[VA, Int, Int](min) >=> kleisli[VA, Int, Int](max)).fail.toOption.get.list should equal(List("must be < 100"))
     }
   }
+
+  describe("Serialize and compose applicatives") {
+    it("should compose and form a bigger ADT") {
+      case class Address(no: String, street: String, zip: String)
+      implicit val AddressFormat: Format[Address] = 
+        asProduct3("no", "street", "zip")(Address)(Address.unapply(_).get)
+
+      case class Name(firstName: String, lastName: String)
+      implicit val NameFormat: Format[Name] =
+        asProduct2("firstName", "lastName")(Name)(Name.unapply(_).get)
+
+      case class Me(name: Name, age: Int, address: Address)
+      implicit val MeFormat: Format[Me] =
+        asProduct3("name", "age", "address")(Me)(Me.unapply(_).get)
+
+      val name = Name("debasish", "ghosh")
+      val address = Address("1050/2", "Survey Park", "700075")
+      val me = Me(name, 40, address)
+
+      fromjson[Me](tojson(me).toOption.get) should equal(me.success)
+
+      (tojson(name) |@| tojson(address) |@| tojson(40)) {(nm, add, age) => 
+        (fromjson[Name](nm) |@| fromjson[Address](add) |@| fromjson[Int](age)) {(n, ad, ag) => Me(n, ag, ad)}
+      } should equal(Success(Success(me)))
+    }
+  }
 }
