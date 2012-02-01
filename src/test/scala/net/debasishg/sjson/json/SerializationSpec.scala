@@ -93,23 +93,23 @@ class SerializationSpec extends Spec with ShouldMatchers {
     }
   }
 
-  describe("Serialize and then selectively pick and validate") {
-    it("should serialize and validate") {
-      case class Me(firstName: String, lastName: String, age: Int, no: String, street: String, zip: String)
-      implicit val MeFormat: Format[Me] =
-        asProduct6("firstName", "lastName", "age", "no", "street", "zip")(Me)(Me.unapply(_).get)
+  describe("Serialize and chain validate using Kleisli") {
+    case class Me(firstName: String, lastName: String, age: Int, no: String, street: String, zip: String)
+    implicit val MeFormat: Format[Me] =
+      asProduct6("firstName", "lastName", "age", "no", "street", "zip")(Me)(Me.unapply(_).get)
   
+    val positive: Int => ValidationNEL[String, Int] = 
+      (i: Int) => if (i > 0) i.success else "must be +ve".fail.liftFailNel
+
+    val min: Int => ValidationNEL[String, Int] = 
+      (i: Int) => if (i > 10) i.success else "must be > 10".fail.liftFailNel
+
+    val max: Int => ValidationNEL[String, Int] = 
+      (i: Int) => if (i < 100) i.success else "must be < 100".fail.liftFailNel
+
+    it("should serialize and validate") {
       val me = Me("debasish", "ghosh", 30, "1050/2", "survey park", "700075")
       val json = tojson(me)
-
-      val positive: Int => ValidationNEL[String, Int] = 
-        (i: Int) => if (i > 0) i.success else "must be +ve".fail.liftFailNel
-
-      val min: Int => ValidationNEL[String, Int] = 
-        (i: Int) => if (i > 10) i.success else "must be > 10".fail.liftFailNel
-
-      val max: Int => ValidationNEL[String, Int] = 
-        (i: Int) => if (i < 100) i.success else "must be < 100".fail.liftFailNel
 
       import Validation.Monad._
       type VA[A] = ValidationNEL[String, A]
@@ -148,6 +148,23 @@ class SerializationSpec extends Spec with ShouldMatchers {
       (tojson(name) |@| tojson(address) |@| tojson(40)) {(nm, add, age) => 
         (fromjson[Name](nm) |@| fromjson[Address](add) |@| fromjson[Int](age)) {(n, ad, ag) => Me(n, ag, ad)}
       } should equal(Success(Success(me)))
+    }
+  }
+
+  describe("Serialize and mutate") {
+    it("should serialize and then mutate some fields before de-serialize") {
+      case class Name(firstName: String, lastName: String)
+      implicit val NameFormat: Format[Name] =
+        asProduct2("firstName", "lastName")(Name)(Name.unapply(_).get)
+
+      val name = Name("debasish", "ghosh")
+      val json = tojson(name)
+      val fields =
+        for {
+          f <- field_c[String]("firstName")
+          l <- field_c[String]("lastName")
+        } yield(f |@| l)
+      fields(json.toOption.get) {(f, l) => Name(f.toUpperCase, l.toUpperCase)} should equal(Name("DEBASISH", "GHOSH").success)
     }
   }
 }
