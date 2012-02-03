@@ -6,15 +6,21 @@ import scalaz._
 import Scalaz._
 
 import dispatch.json._
+import rosetta.json._
 
-object JsonSerialization {
-  def tojson[T](o: T)(implicit tjs: Writes[T]): ValidationNEL[String, JsValue] = tjs.writes(o)
+trait JsonSerialization[Json] {
+  def tojson[T](o: T)(implicit tjs: Writes[T, Json]): ValidationNEL[String, Json] = tjs.writes(o)
 
-  def fromjson[T](json: JsValue)(implicit fjs: Reads[T]): ValidationNEL[String, T] = fjs.reads(json)
+  def fromjson[T](json: Json)(implicit fjs: Reads[T, Json]): ValidationNEL[String, T] = fjs.reads(json)
 
-  def tobinary[T](o: T)(implicit tjs: Writes[T]): ValidationNEL[String, Array[Byte]] = 
-    tojson(o) map JsValue.toJson map (s => s.getBytes("UTF-8"))
+  // def tobinary[T](o: T)(implicit tjs: Writes[T, Json]): ValidationNEL[String, Array[Byte]] = 
+    // tojson(o) map JsValue.toJson map (s => s.getBytes("UTF-8"))
 
-  def frombinary[T](bytes: Array[Byte])(implicit fjs: Reads[T]): ValidationNEL[String, T] =
-    fromjson(Js(new String(bytes, "UTF-8")))
+  // def frombinary[T](bytes: Array[Byte])(implicit fjs: Reads[T]): ValidationNEL[String, T] =
+    // fromjson(Js(new String(bytes, "UTF-8")))
 }
+
+// object JsonSerialization extends JsonSerialization[JsValue] {
+  // import rosetta.json.dispatch._
+  // jsonImplementation = JsDispatch
+// }

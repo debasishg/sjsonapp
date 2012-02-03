@@ -6,11 +6,15 @@ version := "0.1"
 
 crossScalaVersions := Seq("2.9.1", "2.9.0", "2.8.1", "2.8.0")
 
+resolvers ++= Seq("ReportGrid repo (public)" at   "http://nexus.reportgrid.com/content/repositories/public-releases")
+
 libraryDependencies <++= scalaVersion { scalaVersion =>
   // Helper for dynamic version switching based on scalaVersion
   val scalatestVersion: String => String = Map(("2.8.0" -> "1.3.1.RC2"), ("2.8.1" -> "1.5.1")) getOrElse (_, "1.6.1")
   // The dependencies with proper scope
   Seq(
+    "net.databinder"       % "dispatch-json_2.9.1"    % "0.8.7"            % "compile",
+    "com.reportgrid"       % "rosetta-json_2.9.1"     % "0.3.5"            % "compile",
     "net.databinder"       % "dispatch-json_2.9.1"    % "0.8.7"            % "compile",
     "log4j"                % "log4j"                  % "1.2.16"           % "provided",
     "junit"                % "junit"                  % "4.8.1"            % "test",
@@ -21,7 +25,7 @@ libraryDependencies <++= scalaVersion { scalaVersion =>
 
 autoCompilerPlugins := true
 
-scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-Xcheckinit")
+scalacOptions ++= Seq("-encoding", "UTF-8", "-deprecation", "-Xcheckinit", "-unchecked")
 
 parallelExecution in Test := false
 

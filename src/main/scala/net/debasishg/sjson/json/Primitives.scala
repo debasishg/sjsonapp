@@ -5,67 +5,52 @@ package json
 import scalaz._
 import Scalaz._
 
-import dispatch.json._
+trait Primitives[Json] extends Protocol[Json] {self: JsonSerialization[Json] =>
+  import jsonImplementation._
 
-trait Primitives extends Protocol {
-  implicit object IntFormat extends Format[Int] {
-    def writes(o: Int) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsNumber(n) => n.intValue.success
+  implicit object IntFormat extends Format[Int, Json] {
+    def writes(o: Int) = JsonLong(o).success
+    def reads(json: Json) = json match {
+      case JsonLong(n) => n.intValue.success
       case _ => "Int expected".fail.liftFailNel
     }
   }
 
-  implicit object ShortFormat extends Format[Short] {
-    def writes(o: Short) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsNumber(n) => n.shortValue.success
-      case _ => "Short expected".fail.liftFailNel
-    }
-  }
-
-  implicit object LongFormat extends Format[Long] {
-    def writes(o: Long) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsNumber(n) => n.longValue.success
+  implicit object LongFormat extends Format[Long, Json] {
+    def writes(o: Long) = JsonLong(o).success
+    def reads(json: Json) = json match {
+      case JsonLong(n) => n.success
       case _ => "Long expected".fail.liftFailNel
     }
   }
 
-  implicit object FloatFormat extends Format[Float] {
-    def writes(o: Float) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsNumber(n) => n.floatValue.success
-      case _ => "Float expected".fail.liftFailNel
-    }
-  }
-
-  implicit object DoubleFormat extends Format[Double] {
-    def writes(o: Double) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsNumber(n) => n.doubleValue.success
+  implicit object DoubleFormat extends Format[Double, Json] {
+    def writes(o: Double) = JsonDouble(o).success
+    def reads(json: Json) = json match {
+      case JsonDouble(n) => n.success
       case _ => "Double expected".fail.liftFailNel
     }
   }
 
-  implicit object BooleanFormat extends Format[Boolean] {
-    def writes(o: Boolean) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsTrue => true.success
-      case JsFalse => false.success
+  implicit object BooleanFormat extends Format[Boolean, Json] {
+    def writes(o: Boolean) = JsonBool(o).success
+    def reads(json: Json) = json match { 
+      case JsonBool(true) => true.success
+      case JsonBool(false) => false.success
       case _ => "Boolean expected".fail.liftFailNel
     }
   }
 
-  implicit object StringFormat extends Format[String] {
-    def writes(o: String) = JsValue.apply(o).success
-    def reads(json: JsValue) = json match {
-      case JsString(s) => s.success
+  implicit object StringFormat extends Format[String, Json] {
+    def writes(o: String) = JsonString(o).success
+    def reads(json: Json) = json match {
+      case JsonString(s) => s.success
       case _ => "String expected".fail.liftFailNel
     }
   }
-  implicit object JsValueFormat extends Format[JsValue] {
-    def writes(o: JsValue) = o.success
-    def reads(json: JsValue) = json.success
+
+  implicit object JsValueFormat extends Format[Json, Json] {
+    def writes(o: Json) = o.success
+    def reads(json: Json) = json.success
   }
 }
