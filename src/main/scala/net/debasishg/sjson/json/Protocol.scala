@@ -56,10 +56,3 @@ trait DefaultProtocol[Json] extends CollectionTypes[Json]
   with Generic[Json] 
   with Primitives[Json] {self: JsonSerialization[Json] =>
 }
-
-/**
-object DefaultProtocol extends DefaultProtocol[JsValue] {
-  import rosetta.json.dispatch._
-  val jsonImplementation = JsonDispatch
-}
-**/

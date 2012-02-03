@@ -13,7 +13,6 @@ libraryDependencies <++= scalaVersion { scalaVersion =>
   val scalatestVersion: String => String = Map(("2.8.0" -> "1.3.1.RC2"), ("2.8.1" -> "1.5.1")) getOrElse (_, "1.6.1")
   // The dependencies with proper scope
   Seq(
-    "net.databinder"       % "dispatch-json_2.9.1"    % "0.8.7"            % "compile",
     "com.reportgrid"       % "rosetta-json_2.9.1"     % "0.3.5"            % "compile",
     "net.databinder"       % "dispatch-json_2.9.1"    % "0.8.7"            % "compile",
     "log4j"                % "log4j"                  % "1.2.16"           % "provided",

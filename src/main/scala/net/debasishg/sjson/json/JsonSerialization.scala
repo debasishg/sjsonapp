@@ -5,7 +5,6 @@ package json
 import scalaz._
 import Scalaz._
 
-import dispatch.json._
 import rosetta.json._
 
 trait JsonSerialization[Json] {
@@ -19,8 +18,3 @@ trait JsonSerialization[Json] {
   // def frombinary[T](bytes: Array[Byte])(implicit fjs: Reads[T]): ValidationNEL[String, T] =
     // fromjson(Js(new String(bytes, "UTF-8")))
 }
-
-// object JsonSerialization extends JsonSerialization[JsValue] {
-  // import rosetta.json.dispatch._
-  // jsonImplementation = JsDispatch
-// }

@@ -16,6 +16,22 @@ trait Primitives[Json] extends Protocol[Json] {self: JsonSerialization[Json] =>
     }
   }
 
+  implicit object ShortFormat extends Format[Short, Json] {
+    def writes(o: Short) = JsonLong(o).success
+    def reads(json: Json) = json match {
+      case JsonLong(n) => n.shortValue.success
+      case _ => "Short expected".fail.liftFailNel
+    }
+  }
+
+  implicit object FloatFormat extends Format[Float, Json] {
+    def writes(o: Float) = JsonDouble(o.toDouble).success
+    def reads(json: Json) = json match {
+      case JsonDouble(n) => n.floatValue.success
+      case _ => "Float expected".fail.liftFailNel
+    }
+  }
+
   implicit object LongFormat extends Format[Long, Json] {
     def writes(o: Long) = JsonLong(o).success
     def reads(json: Json) = json match {
