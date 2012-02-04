@@ -105,4 +105,88 @@ trait JsonProtocol[Json] extends DefaultProtocol[Json] {self: JsonSerialization[
     implicit val MeFormat: Format[Me, Json] =
       asProduct3("name", "age", "address")(Me)(Me.unapply(_).get)
   }
+
+  object AccountProtocol {
+    case class Address(no: Int, street: String, city: String, zip: String)
+    implicit val AddressFormat: Format[Address, Json] = 
+      asProduct4("no", "street", "city", "zip")(Address)(Address.unapply(_).get)
+
+    case class Account(no: String, name: String, addresses: Array[Address])
+    implicit val AccountFormat: Format[Account, Json] =
+      asProduct3("no", "name", "addresses")(Account)(Account.unapply(_).get)
+  }
+
+  object AddressWithOptionalCityProtocol {
+    case class AddressWithOptionalCity(street: String, city: Option[String], zip: String)
+    implicit val AddressWithOptionalCityFormat: Format[AddressWithOptionalCity, Json] =
+      asProduct3("street", "city", "zip")(AddressWithOptionalCity)(AddressWithOptionalCity.unapply(_).get)
+  }
+
+  object WrapperProtocol {
+    case class Name(name: String)
+    implicit val NameFormat: Format[Name, Json] = wrap[Name, String]("name")(_.name, Name)
+
+    case class Holder(item: List[String])
+    implicit val HolderFormat: Format[Holder, Json] = wrap[Holder, List[String]]("item")(_.item, Holder)
+  }
+
+  object InheritanceProtocol {
+    case class Address(no: Int, street: String, city: String, zip: String)
+    implicit val AddressFormat: Format[Address, Json] = 
+      asProduct4("no", "street", "city", "zip")(Address)(Address.unapply(_).get)
+
+    case class Base(no: String, name: String, addresses: List[Address])
+    implicit val BaseFormat: Format[Base, Json] =
+      asProduct3("no", "name", "addresses")(Base)(Base.unapply(_).get)
+
+    class Derived(no: String, name: String, addresses: List[Address], special: Boolean)
+      extends Base(no, name, addresses) {
+      val specialFlag = special
+    }
+    implicit val DerivedFormat: Format[Derived, Json] = new Format[Derived, Json] {
+      def reads(json: Json): Validation[NonEmptyList[String], Derived] = {
+        val Success(b) = fromjson[Base](json)
+        json match {
+          case m@JsonObject(_) =>
+            val Success(spl) = field[Boolean]("specialFlag", m)
+            new Derived(b.no, b.name, b.addresses, spl).success
+          case _ => "JsonObject expected".fail.liftFailNel
+        }
+      }
+      def writes(a: Derived) = {
+        val Success(o) = tojson(a: Base)
+        val JsonObject(m) = o
+        JsonObject(m ++ List(("specialFlag", tojson(a.specialFlag).toOption.get))).success
+      }
+    }
+  }
+
+  object CaseObjectProtocol {
+    sealed trait HttpType
+    implicit val HttpTypeFormat: Format[HttpType, Json] = new Format[HttpType, Json] {
+      def reads(json: Json): Validation[NonEmptyList[String], HttpType] = json match {
+        case JsonString("Get") => Get.success
+        case JsonString("Post") => Post.success
+        case _ => "Invalid HttpType".fail.liftFailNel
+      }
+      def writes(a: HttpType) = a match {
+        case Get => JsonString("Get").success
+        case Post => JsonString("Post").success
+      }
+    }
+
+    case object Get extends HttpType
+    case object Post extends HttpType
+
+    case class Http(url: String, t: HttpType)
+    implicit val HttpFormat: Format[Http, Json] =
+      asProduct2("url", "t")(Http)(Http.unapply(_).get)
+  }
+
+  object RecursiveProtocol {
+    case class Bar(name: String, list: Option[List[Foo]])
+    case class Foo(name: String, list: List[Bar])
+    implicit val BarFormat: Format[Bar, Json] = lazyFormat(asProduct2("name", "list")(Bar)(Bar.unapply(_).get))
+    implicit val FooFormat: Format[Foo, Json] = lazyFormat(asProduct2("name", "list")(Foo)(Foo.unapply(_).get))
+  }
 }
