@@ -91,6 +91,15 @@ class SerializationSpec extends Spec with ShouldMatchers {
       val r = Person("ghosh", "debasish", "G", 270)
       fromjson[Person](tojson(r).toOption.get).fail.toOption.get.list should equal(List("gender must be M or F", "age must be positive and < 100"))
     }
+
+    it("should serialize and report accumulated errors in de-serialization") {
+      case class Person(firstName: String, lastName: String, gender: String, age: Int)
+      implicit val PersonFormat: Format[Person] =
+        asProduct4("firstName", "lastName", "gender", "age")(Person)(Person.unapply(_).get)
+
+      val pjson = """{"FirstName" : "Debasish", "LastName" : "Ghosh", "gender": "M", "age": 40}"""
+      fromjson[Person](Js(pjson)).fail.toOption.get.list should equal(List("field firstName not found", "field lastName not found"))
+    }
   }
 
   describe("Serialize and chain validate using Kleisli") {
