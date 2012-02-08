@@ -19,156 +19,36 @@ trait BasicTypes extends Protocol {
       case x => some(fromjson[T](x)).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, T]
     }
   }
-    implicit def tuple2Format[T1,T2](implicit 
-      fmt1: Format[T1],
-      fmt2: Format[T2]
-    ): Format[   Tuple2[T1 ,T2 ]
-] = new Format[   Tuple2[T1 ,T2 ]
-]{
-      def reads (json: JsValue): Validation[NonEmptyList[String],    Tuple2[T1 ,T2 ]
-] = {
-        val JsArray(e1::e2:: Nil) = json
+
+  <#list 2..6 as i>
+  <#assign typeName>
+   Tuple${i}[<#list 1..i as j>T${j} <#if i != j>,</#if></#list>]
+  </#assign>
+  implicit def tuple${i}Format[<#list 1..i as j>T${j}<#if i !=j>,</#if></#list>](implicit
+    <#list 1..i as j>
+      fmt${j}: Format[T${j}]<#if i != j>,</#if>
+    </#list>
+    ): Format[${typeName}] = new Format[${typeName}]{
+      def reads (json: JsValue): Validation[NonEmptyList[String], ${typeName}] = {
+        val JsArray(<#list 1..i as j>e${j}::</#list> Nil) = json
         (
-    fromjson[T1](e1)|@|
-    fromjson[T2](e2)
+    <#list 1..i as j>
+    fromjson[T${j}](e${j})<#if i != j>|@|</#if>
+    </#list>
         ).tupled
       }
-      def writes(tuple:    Tuple2[T1 ,T2 ]
-) = tuple match {
-        case (t1,t2) => 
+      def writes(tuple: ${typeName}) = tuple match {
+        case (<#list 1..i as j>t${j}<#if i != j>,</#if></#list>) =>
           val l = List(
-      tojson(t1)(fmt1),tojson(t2)(fmt2)).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, JsValue]
+      <#list 1..i as j>tojson(t${j})(fmt${j})<#if i != j>,</#if></#list>).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, JsValue]
           l match {
             case Success(js) => JsArray(js).success
-            case Failure(errs) => errs.fail 
+            case Failure(errs) => errs.fail
           }
-        case _ => ("Tuple" + 2 + " expected").fail.liftFailNel
+        case _ => ("Tuple" + ${i} + " expected").fail.liftFailNel
       }
   }
-  implicit def tuple3Format[T1,T2,T3](implicit 
-      fmt1: Format[T1],
-      fmt2: Format[T2],
-      fmt3: Format[T3]
-    ): Format[   Tuple3[T1 ,T2 ,T3 ]
-] = new Format[   Tuple3[T1 ,T2 ,T3 ]
-]{
-      def reads (json: JsValue): Validation[NonEmptyList[String],    Tuple3[T1 ,T2 ,T3 ]
-] = {
-        val JsArray(e1::e2::e3:: Nil) = json
-        (
-    fromjson[T1](e1)|@|
-    fromjson[T2](e2)|@|
-    fromjson[T3](e3)
-        ).tupled
-      }
-      def writes(tuple:    Tuple3[T1 ,T2 ,T3 ]
-) = tuple match {
-        case (t1,t2,t3) => 
-          val l = List(
-      tojson(t1)(fmt1),tojson(t2)(fmt2),tojson(t3)(fmt3)).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, JsValue]
-          l match {
-            case Success(js) => JsArray(js).success
-            case Failure(errs) => errs.fail 
-          }
-        case _ => ("Tuple" + 3 + " expected").fail.liftFailNel
-      }
-  }
-  implicit def tuple4Format[T1,T2,T3,T4](implicit 
-      fmt1: Format[T1],
-      fmt2: Format[T2],
-      fmt3: Format[T3],
-      fmt4: Format[T4]
-    ): Format[   Tuple4[T1 ,T2 ,T3 ,T4 ]
-] = new Format[   Tuple4[T1 ,T2 ,T3 ,T4 ]
-]{
-      def reads (json: JsValue): Validation[NonEmptyList[String],    Tuple4[T1 ,T2 ,T3 ,T4 ]
-] = {
-        val JsArray(e1::e2::e3::e4:: Nil) = json
-        (
-    fromjson[T1](e1)|@|
-    fromjson[T2](e2)|@|
-    fromjson[T3](e3)|@|
-    fromjson[T4](e4)
-        ).tupled
-      }
-      def writes(tuple:    Tuple4[T1 ,T2 ,T3 ,T4 ]
-) = tuple match {
-        case (t1,t2,t3,t4) => 
-          val l = List(
-      tojson(t1)(fmt1),tojson(t2)(fmt2),tojson(t3)(fmt3),tojson(t4)(fmt4)).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, JsValue]
-          l match {
-            case Success(js) => JsArray(js).success
-            case Failure(errs) => errs.fail 
-          }
-        case _ => ("Tuple" + 4 + " expected").fail.liftFailNel
-      }
-  }
-  implicit def tuple5Format[T1,T2,T3,T4,T5](implicit 
-      fmt1: Format[T1],
-      fmt2: Format[T2],
-      fmt3: Format[T3],
-      fmt4: Format[T4],
-      fmt5: Format[T5]
-    ): Format[   Tuple5[T1 ,T2 ,T3 ,T4 ,T5 ]
-] = new Format[   Tuple5[T1 ,T2 ,T3 ,T4 ,T5 ]
-]{
-      def reads (json: JsValue): Validation[NonEmptyList[String],    Tuple5[T1 ,T2 ,T3 ,T4 ,T5 ]
-] = {
-        val JsArray(e1::e2::e3::e4::e5:: Nil) = json
-        (
-    fromjson[T1](e1)|@|
-    fromjson[T2](e2)|@|
-    fromjson[T3](e3)|@|
-    fromjson[T4](e4)|@|
-    fromjson[T5](e5)
-        ).tupled
-      }
-      def writes(tuple:    Tuple5[T1 ,T2 ,T3 ,T4 ,T5 ]
-) = tuple match {
-        case (t1,t2,t3,t4,t5) => 
-          val l = List(
-      tojson(t1)(fmt1),tojson(t2)(fmt2),tojson(t3)(fmt3),tojson(t4)(fmt4),tojson(t5)(fmt5)).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, JsValue]
-          l match {
-            case Success(js) => JsArray(js).success
-            case Failure(errs) => errs.fail 
-          }
-        case _ => ("Tuple" + 5 + " expected").fail.liftFailNel
-      }
-  }
-  implicit def tuple6Format[T1,T2,T3,T4,T5,T6](implicit 
-      fmt1: Format[T1],
-      fmt2: Format[T2],
-      fmt3: Format[T3],
-      fmt4: Format[T4],
-      fmt5: Format[T5],
-      fmt6: Format[T6]
-    ): Format[   Tuple6[T1 ,T2 ,T3 ,T4 ,T5 ,T6 ]
-] = new Format[   Tuple6[T1 ,T2 ,T3 ,T4 ,T5 ,T6 ]
-]{
-      def reads (json: JsValue): Validation[NonEmptyList[String],    Tuple6[T1 ,T2 ,T3 ,T4 ,T5 ,T6 ]
-] = {
-        val JsArray(e1::e2::e3::e4::e5::e6:: Nil) = json
-        (
-    fromjson[T1](e1)|@|
-    fromjson[T2](e2)|@|
-    fromjson[T3](e3)|@|
-    fromjson[T4](e4)|@|
-    fromjson[T5](e5)|@|
-    fromjson[T6](e6)
-        ).tupled
-      }
-      def writes(tuple:    Tuple6[T1 ,T2 ,T3 ,T4 ,T5 ,T6 ]
-) = tuple match {
-        case (t1,t2,t3,t4,t5,t6) => 
-          val l = List(
-      tojson(t1)(fmt1),tojson(t2)(fmt2),tojson(t3)(fmt3),tojson(t4)(fmt4),tojson(t5)(fmt5),tojson(t6)(fmt6)).sequence[({type λ[α]=ValidationNEL[String, α]})#λ, JsValue]
-          l match {
-            case Success(js) => JsArray(js).success
-            case Failure(errs) => errs.fail 
-          }
-        case _ => ("Tuple" + 6 + " expected").fail.liftFailNel
-      }
-  }
+  </#list>
 }
 
 trait CollectionTypes extends BasicTypes with Generic {
