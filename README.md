@@ -1,3 +1,4 @@
+# sjsonapp : An Applicative layer on sjson
 
 <a HREF="https://github.com/debasishg/sjson">sjson</A> has just gone applicative. I have changed the typeclasses for reading and writing jsons so that the typeclass protocols now return applicatives instead of raw types. Of course this makes the protocols composable with any other applicative based API in the world. This is the advantage of programming with generic abstractions like functors, applicatives and monads - you can compose them readily with any API that the world has written using the same ones.
 
