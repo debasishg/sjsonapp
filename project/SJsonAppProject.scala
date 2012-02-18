@@ -8,17 +8,21 @@ object SJsonAppProject extends Build
   lazy val commonSettings: Seq[Setting[_]] = Seq(
     organization := "net.debasishg",
     version := "0.1",
-    scalaVersion := "2.9.1"
+    scalaVersion := "2.9.1",
+    resolvers ++= Seq("ReportGrid repo (public)" at   "http://nexus.reportgrid.com/content/repositories/public-releases",
+             "ReportGrid snapshot repo (public)" at   "http://nexus.reportgrid.com/content/repositories/public-snapshots")
   )
 
   lazy val coreSettings = commonSettings ++ template ++ Seq(
     name := "sjsonapp",
-    libraryDependencies ++= Seq("net.databinder" % "dispatch-json_2.9.1" % "0.8.7",
-                                "com.reportgrid" % "rosetta-json_2.9.1"  % "0.3.5"   % "compile",
-                                "net.liftweb"   %% "lift-json"           % "2.4-M4"  % "provided" intransitive(),
-                                "junit" % "junit" % "4.8.1" % "test",
-                                "org.scalaz" %% "scalaz-core" % "6.0.4",
-                                "org.scalatest" % "scalatest_2.9.1" % "1.6.1" % "test"),
+    libraryDependencies ++= Seq(
+            "net.databinder"       % "dispatch-json_2.9.1" % "0.8.7",
+            "com.reportgrid"       % "rosetta-json_2.9.1"  % "0.3.5"   % "compile",
+            "net.liftweb"         %% "lift-json"           % "2.4-M4"  % "test" intransitive(),
+            "com.reportgrid"       % "blueeyes_2.9.1"      % "0.5.2"   % "test" intransitive(),
+            "junit"                % "junit"               % "4.8.1"   % "test",
+            "org.scalaz"          %% "scalaz-core"         % "6.0.4",
+            "org.scalatest"        % "scalatest_2.9.1"     % "1.6.1"   % "test"),
     parallelExecution in Test := false,
     publishTo := Some("Scala Tools Nexus" at "http://nexus.scala-tools.org/content/repositories/releases/"),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),

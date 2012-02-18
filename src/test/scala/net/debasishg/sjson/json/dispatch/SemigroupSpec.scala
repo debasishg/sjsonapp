@@ -12,14 +12,17 @@ import scalaz._
 import Scalaz._
 
 import dispatch.json._
-import DispatchJsonSerialization._
+import rosetta.json.dispatch._
 import Semigroups._
 
 @RunWith(classOf[JUnitRunner])
 class TypeclassSpec extends Spec 
                 with ShouldMatchers
                 with BeforeAndAfterEach
-                with BeforeAndAfterAll {
+                with BeforeAndAfterAll
+                with JsonSerialization[JsValue] with DefaultProtocol[JsValue] {
+
+  val jsonImplementation = JsonDispatch
 
   describe("JsString as Semigroup") {
     it("should append") {
@@ -53,7 +56,6 @@ class TypeclassSpec extends Spec
     }
 
     it("should append Maps after serialization") {
-      import DispatchJsonSerialization._
       val m1 = Map("1" -> "a", "2" -> "b", "3" -> "c")
       val m2 = Map("4" -> "d", "5" -> "e")
       (tojson(m1) |@| tojson(m2))(_ |+| _) should equal(tojson(m1 |+| m2))
