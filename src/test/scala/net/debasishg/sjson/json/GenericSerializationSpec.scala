@@ -84,20 +84,6 @@ trait GenericSerializationSpec[Json] extends Spec with ShouldMatchers with JsonP
     }
   }
 
-  describe("Serialize using binary") {
-    import CompositeProtocol._
-
-    it("should serialize") {
-      val name = Name("debasish", "ghosh")
-      frombinary[Name](tobinary(name).toOption.get) should equal(name.success)
-
-      val address = Address("1050/2", "Survey Park", "700075")
-      val me = Me(name, 40, address)
-
-      frombinary[Me](tobinary(me).toOption.get) should equal(me.success)
-    }
-  }
-
   describe("Serialization of lists") {
     it ("should serialize list of Ints") {
       val l1 = List(100, 200, 300, 400)

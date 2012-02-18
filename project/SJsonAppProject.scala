@@ -14,7 +14,8 @@ object SJsonAppProject extends Build
   lazy val coreSettings = commonSettings ++ template ++ Seq(
     name := "sjsonapp",
     libraryDependencies ++= Seq("net.databinder" % "dispatch-json_2.9.1" % "0.8.7",
-                                "com.reportgrid" % "rosetta-json_2.9.1"  % "0.3.5" % "compile",
+                                "com.reportgrid" % "rosetta-json_2.9.1"  % "0.3.5"   % "compile",
+                                "net.liftweb"   %% "lift-json"           % "2.4-M4"  % "provided" intransitive(),
                                 "junit" % "junit" % "4.8.1" % "test",
                                 "org.scalaz" %% "scalaz-core" % "6.0.4",
                                 "org.scalatest" % "scalatest_2.9.1" % "1.6.1" % "test"),
